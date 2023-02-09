@@ -65,7 +65,15 @@ export class PortalsFS implements vscode.FileSystemProvider {
     // --- manage file metadata
 
     async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-        return await this._lookup(uri, false);
+        if (WebExtensionContext.fileDataMap.getFileMap.get(uri.fsPath)?.hasDirtyChanges) {
+            await this.updateMtime(uri);
+            console.log("Dirty changes in editor file");
+        }
+
+        const entry = await this._lookup(uri, false);
+
+        console.log("file stat", uri.toString(), entry.mtime);
+        return entry;
     }
 
     async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
@@ -113,7 +121,8 @@ export class PortalsFS implements vscode.FileSystemProvider {
         return new Uint8Array();
     }
 
-    async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+    async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }, writeToDataverse = true): Promise<void> {
+        let mtime = Date.now();
         const basename = path.posix.basename(uri.path);
         const parent = await this._lookupParentDirectory(uri);
         let entry = parent.entries.get(basename);
@@ -130,7 +139,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
             entry = new File(basename);
             parent.entries.set(basename, entry);
             this._fireSoon({ type: vscode.FileChangeType.Created, uri });
-        } else if (WebExtensionContext.fileDataMap.getFileMap.get(uri.fsPath)?.hasDirtyChanges) {
+        } else if (WebExtensionContext.fileDataMap.getFileMap.get(uri.fsPath)?.hasDirtyChanges && writeToDataverse) {
             // Save data to dataverse
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
@@ -139,14 +148,20 @@ export class PortalsFS implements vscode.FileSystemProvider {
             }, async () => {
                 WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_SAVE_FILE_TRIGGERED);
                 await this._saveFileToDataverseFromVFS(uri);
+                console.log("writefile: Inside dataverse call");
+                if (entry?.mtime) {
+                    mtime = entry?.mtime - 1000;
+                    console.log("writefile: Inside dataverse call - updated mtime");
+                }
             });
         }
 
-        entry.mtime = Date.now();
+        entry.mtime = mtime;
+        console.log("writefile mtime value", entry.mtime, writeToDataverse, options.create, options.overwrite);
         entry.size = content.byteLength;
         entry.data = content;
 
-        this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
+        //this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
     }
 
     // --- manage files/folders
@@ -168,6 +183,26 @@ export class PortalsFS implements vscode.FileSystemProvider {
 
     async delete(): Promise<void> {
         throw new Error('Method not implemented.');
+    }
+
+    async updateMtime(uri: vscode.Uri): Promise<void> {
+        const basename = path.posix.basename(uri.path);
+        const parent = await this._lookupParentDirectory(uri);
+        const entry = parent.entries.get(basename);
+        console.log("Old", entry?.mtime);
+
+        if (!entry) {
+            throw vscode.FileSystemError.FileNotFound();
+        }
+        if (entry instanceof Directory) {
+            throw vscode.FileSystemError.FileIsADirectory(uri);
+        }
+
+        entry.mtime = entry.mtime + 2000;
+        entry.data = new TextEncoder().encode("<div>content</div>");
+        entry.size = entry.data.byteLength;
+        console.log("New", entry?.mtime);
+        this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
     }
 
     // --- lookup

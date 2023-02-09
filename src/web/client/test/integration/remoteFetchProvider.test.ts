@@ -17,7 +17,7 @@ import {
 } from "../../schema/constants";
 import * as urlBuilderUtil from "../../utilities/urlBuilderUtil";
 import * as commonUtil from "../../utilities/commonUtil";
-import {  expect } from "chai";
+import { expect } from "chai";
 import * as errorHandler from "../../common/errorHandler";
 
 describe("remoteFetchProvider", () => {
@@ -39,17 +39,18 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -219,17 +220,18 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -292,13 +294,6 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        const showErrorMessage = stub(vscode.window, "showErrorMessage");
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
@@ -317,6 +312,14 @@ describe("remoteFetchProvider", () => {
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
+
+        const showErrorMessage = stub(vscode.window, "showErrorMessage");
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const sendAPIFailureTelemetry = stub(
             WebExtensionContext.telemetry,
@@ -370,17 +373,18 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -451,17 +455,18 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -499,7 +504,7 @@ describe("remoteFetchProvider", () => {
             WebExtensionContext.telemetry,
             "sendAPITelemetry"
         );
-        
+
         //Action
         await fetchDataFromDataverseAndUpdateVFS(
             accessToken,
@@ -534,17 +539,18 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -618,17 +624,19 @@ describe("remoteFetchProvider", () => {
             [schemaKey.SCHEMA_VERSION, "portalschemav2"],
         ]);
 
-        WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
-            queryParamsMap
-        );
-
         const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
         const websiteIdToLanguage = new Map<string, string>([
             ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
         ]);
+
+        WebExtensionContext.setWebExtensionContext(
+            "webPage",
+            "",
+            queryParamsMap,
+            portalFs
+        );
+
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,

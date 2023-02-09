@@ -29,6 +29,7 @@ import {
 } from "../integration/portalSchemaReader.mock";
 import WebExtensionContext from "../../WebExtensionContext";
 import * as Constants from "../../common/constants";
+import { PortalsFS } from "../../dal/fileSystemProvider";
 
 describe("schemaHelperUtil", () => {
     afterEach(() => {
@@ -79,7 +80,7 @@ describe("schemaHelperUtil", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(entitiesSchemaMap);
-        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap);
+        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap, new PortalsFS());
         //Action
         const result = getEntity(entity);
         //Assert
@@ -111,7 +112,7 @@ describe("schemaHelperUtil", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(entitiesSchemaMap);
-        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap);
+        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap, new PortalsFS());
 
         //Action
         const result = getEntity(entity);
@@ -139,7 +140,7 @@ describe("schemaHelperUtil", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap);
+        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap, new PortalsFS());
         //Action
         const result = getEntity(entity);
         //Assert
@@ -166,7 +167,7 @@ describe("schemaHelperUtil", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap);
+        WebExtensionContext.setWebExtensionContext("", "", queryParamsMap, new PortalsFS());
         //Action
         const result = getEntity(entity);
         //Assert

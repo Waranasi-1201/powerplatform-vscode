@@ -14,6 +14,7 @@ import { schemaKey } from "./schema/constants";
 import { telemetryEventNames } from "./telemetry/constants";
 import { EntityDataMap } from "./context/entityDataMap";
 import { FileDataMap } from "./context/fileDataMap";
+import { PortalsFS } from "./dal/fileSystemProvider";
 
 export interface IWebExtensionContext {
     // From portalSchema properties
@@ -61,6 +62,7 @@ class WebExtensionContext implements IWebExtensionContext {
     private _isContextSet: boolean;
     private _currentSchemaVersion: string;
     private _telemetry: WebExtensionTelemetry;
+    private _portalsFS: PortalsFS | undefined;
 
     public get schemaDataSourcePropertiesMap() { return this._schemaDataSourcePropertiesMap; }
     public get schemaEntitiesMap() { return this._schemaEntitiesMap; }
@@ -79,6 +81,7 @@ class WebExtensionContext implements IWebExtensionContext {
     public get isContextSet() { return this._isContextSet; }
     public get currentSchemaVersion() { return this._currentSchemaVersion; }
     public get telemetry() { return this._telemetry; }
+    public get portalFS() { return this._portalsFS; }
 
     constructor() {
         this._schemaDataSourcePropertiesMap = new Map<string, string>();
@@ -100,7 +103,7 @@ class WebExtensionContext implements IWebExtensionContext {
         this._telemetry = new WebExtensionTelemetry();
     }
 
-    public setWebExtensionContext(entityName: string, entityId: string, queryParamsMap: Map<string, string>) {
+    public setWebExtensionContext(entityName: string, entityId: string, queryParamsMap: Map<string, string>, portalsFS: PortalsFS) {
         const schema = queryParamsMap.get(schemaKey.SCHEMA_VERSION) as string;
         // Initialize context from URL params
         this._currentSchemaVersion = schema;
@@ -108,6 +111,7 @@ class WebExtensionContext implements IWebExtensionContext {
         this._defaultEntityId = entityId;
         this._urlParametersMap = queryParamsMap;
         this._rootDirectory = vscode.Uri.parse(`${Constants.PORTALS_URI_SCHEME}:/${queryParamsMap.get(Constants.queryParameters.WEBSITE_NAME) as string}/`, true);
+        this._portalsFS = portalsFS;
 
         // Initialize context from schema values
         this._schemaEntitiesMap = getEntitiesSchemaMap(schema);

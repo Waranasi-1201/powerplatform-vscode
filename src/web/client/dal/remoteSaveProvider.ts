@@ -143,16 +143,15 @@ async function getLatestContent(
 
         if (response.ok) {
             const result = await response.json();
+            console.log("Content changed on Dataverse", entityColumnContent != result[attributePath.source]);
             if (result[attributePath.source] && entityColumnContent != result[attributePath.source]) {
-                // TODO - use this part for showing diff to user on changed values
-                // Compare the returned value with current updated content value
-                // This value will be in (result[attributePath.source])[attributePath.relativePath] -
-                // - in case of new data model webpages content
-                // entityColumnContent = result[attributePath.source];
-                // TODO - update entity etag value to latest here
+                //await WebExtensionContext.portalFS?.updateMtime(fileUri);
+                //await WebExtensionContext.portalFS?.writeFile(fileUri, new TextEncoder().encode(result[attributePath.source]), { create: false, overwrite: false }, false);
+                //await WebExtensionContext.portalFS?.stat(fileUri);
             }
             WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_ENTITY_CONTENT_CHANGED);
         } else if (response.status === 304) {
+            console.log("Content NOT updated on Dataverse");
             WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_ENTITY_CONTENT_SAME);
         } else {
             throw new Error(response.statusText);

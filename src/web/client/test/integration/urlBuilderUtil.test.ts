@@ -26,6 +26,7 @@ import * as portalSchemaReader from "../../schema/portalSchemaReader";
 import WebExtensionContext, {
     IWebExtensionContext,
 } from "../../WebExtensionContext";
+import { PortalsFS } from "../../dal/fileSystemProvider";
 
 describe("URLBuilder", () => {
     afterEach(() => {
@@ -44,7 +45,7 @@ describe("URLBuilder", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
 
         const isSingleEntity = true;
         const result: string =
@@ -64,7 +65,7 @@ describe("URLBuilder", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
         const result = getParameterizedRequestUrlTemplate(false);
         expect(result).eq(schemaKey.MULTI_ENTITY_URL);
     });
@@ -143,7 +144,7 @@ describe("URLBuilder", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
 
         const uriName = "make.powerpages.com";
         const res = pathHasEntityFolderName(uriName);
@@ -165,7 +166,7 @@ describe("URLBuilder", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
 
         const uriName = "make.powerpages.com";
         const res = pathHasEntityFolderName(uriName);
@@ -238,7 +239,7 @@ describe("URLBuilder", () => {
         sinon
             .stub(portalSchemaReader, "getEntitiesSchemaMap")
             .returns(new Map());
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
 
         const powerPlatformExtensionContext: IWebExtensionContext = {
             schemaDataSourcePropertiesMap: new Map<string, string>([
@@ -312,7 +313,7 @@ describe("URLBuilder", () => {
             .returns(
                 new Map<string, Map<string, string>>([["WEBPAGES", mock]])
             );
-        WebExtensionContext.setWebExtensionContext("", "", new Map());
+        WebExtensionContext.setWebExtensionContext("", "", new Map(), new PortalsFS());
 
         const dataverseOrgUrl = "dataverseOrgUrl";
         const entity = "WEBPAGES";

@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 if (!checkMandatoryParameters(appName, entity, entityId, queryParamsMap)) return;
 
                 removeEncodingFromParameters(queryParamsMap);
-                WebExtensionContext.setWebExtensionContext(entity, entityId, queryParamsMap);
+                WebExtensionContext.setWebExtensionContext(entity, entityId, queryParamsMap, portalsFS);
 
                 WebExtensionContext.telemetry.sendExtensionInitPathParametersTelemetry(appName, entity, entityId);
 
