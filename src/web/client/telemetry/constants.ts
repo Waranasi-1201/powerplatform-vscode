@@ -30,5 +30,6 @@ export enum telemetryEventNames {
     WEB_EXTENSION_ENTITY_CONTENT_SAME = 'WebExtensionEntityContentSame',
     NPS_AUTHENTICATION_STARTED = 'WebExtensionNPSAuthenticationStarted',
     NPS_AUTHENTICATION_COMPLETED = 'WebExtensionNPSAuthenticationCompleted',
-    NPS_AUTHENTICATION_FAILED = 'WebExtensionNPSAuthenticationFailed'
+    NPS_AUTHENTICATION_FAILED = 'WebExtensionNPSAuthenticationFailed',
+    WEB_EXTENSION_CREATE_ENTITY_FOLDER = 'WebExtensionCreateEntityFolder',
 }

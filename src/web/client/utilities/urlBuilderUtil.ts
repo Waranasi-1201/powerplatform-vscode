@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { httpMethod } from "../common/constants";
+import { httpMethod, MULTI_FILE_FEATURE, queryParameters } from "../common/constants";
 import WebExtensionContext from "../WebExtensionContext";
 import { entityAttributesWithBase64Encoding, schemaEntityKey, schemaEntityName, schemaKey } from "../schema/constants";
 import { getEntity } from "./schemaHelperUtil";
@@ -28,16 +28,19 @@ export function getRequestURL(
     switch (method) {
         case httpMethod.GET:
             parameterizedUrlTemplate = parameterizedUrlTemplate
-                + (attributeQueryParameters ?? getEntity(entity)?.get(schemaEntityKey.FETCH_QUERY_PARAMETERS));
+                + (attributeQueryParameters ?? getEntity(entity)?.get(MULTI_FILE_FEATURE ? schemaEntityKey.MULTI_FILE_FETCH_QUERY_PARAMETERS : schemaEntityKey.FETCH_QUERY_PARAMETERS));
             break;
         default:
             break;
     }
 
-    return parameterizedUrlTemplate.replace('{dataverseOrgUrl}', dataverseOrgUrl).replace('{entity}', getEntity(entity)?.get(schemaEntityKey.DATAVERSE_ENTITY_NAME) as string)
-        .replace('{entityId}', entityId).replace('{api}', WebExtensionContext.schemaDataSourcePropertiesMap.get(schemaKey.API) as string)
+    return parameterizedUrlTemplate.replace('{dataverseOrgUrl}', dataverseOrgUrl)
+        .replace('{api}', WebExtensionContext.schemaDataSourcePropertiesMap.get(schemaKey.API) as string)
         .replace('{data}', WebExtensionContext.schemaDataSourcePropertiesMap.get(schemaKey.DATA) as string)
-        .replace('{version}', WebExtensionContext.schemaDataSourcePropertiesMap.get(schemaKey.DATAVERSE_API_VERSION) as string);
+        .replace('{version}', WebExtensionContext.schemaDataSourcePropertiesMap.get(schemaKey.DATAVERSE_API_VERSION) as string)
+        .replace('{websiteId}', WebExtensionContext.urlParametersMap.get(queryParameters.WEBSITE_ID) as string)
+        .replace('{entity}', getEntity(entity)?.get(schemaEntityKey.DATAVERSE_ENTITY_NAME) as string)
+        .replace('{entityId}', entityId);
 }
 
 export function getCustomRequestURL(dataverseOrgUrl: string, entity: string, urlQueryKey: string = schemaKey.MULTI_ENTITY_URL): string {

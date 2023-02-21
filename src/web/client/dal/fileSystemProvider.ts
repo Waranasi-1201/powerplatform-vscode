@@ -14,6 +14,8 @@ import { saveData } from './remoteSaveProvider';
 import * as nls from 'vscode-nls';
 import { ERRORS } from '../common/errorHandler';
 import { telemetryEventNames } from '../telemetry/constants';
+import { getEntity } from '../utilities/schemaHelperUtil';
+import { folderExportType, schemaEntityKey } from '../schema/constants';
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class File implements vscode.FileStat {
@@ -68,7 +70,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
         return await this._lookup(uri, false);
     }
 
-    async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+    async readDirectory(uri: vscode.Uri, callFromExtensionActivate = false): Promise<[string, vscode.FileType][]> {
         const result: [string, vscode.FileType][] = [];
         try {
             const entry = await this._lookupAsDirectory(uri, false);
@@ -79,8 +81,10 @@ export class PortalsFS implements vscode.FileSystemProvider {
             const castedError = error as vscode.FileSystemError;
 
             if (castedError.code === vscode.FileSystemError.FileNotFound.name) {
-                if (WebExtensionContext.isContextSet &&
-                    uri.toString().toLowerCase() === WebExtensionContext.rootDirectory.toString().toLowerCase()) {
+                if (callFromExtensionActivate &&
+                    WebExtensionContext.isContextSet &&
+                    uri.toString().toLowerCase() === WebExtensionContext.rootDirectory.toString().toLowerCase()
+                ) {
                     WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_DIRECTORY_TRIGGERED);
                     await this._loadFromDataverseToVFS();
                 }
@@ -100,16 +104,14 @@ export class PortalsFS implements vscode.FileSystemProvider {
 
             if (castedError.code === vscode.FileSystemError.FileNotFound.name) {
                 if (WebExtensionContext.isContextSet
-                    && uri.toString().includes(WebExtensionContext.rootDirectory.toString())) {
-                    if (pathHasEntityFolderName(uri.toString())) {
-                        WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_FILE_TRIGGERED);
-                        await this._loadFromDataverseToVFS();
-                        const data = await this._lookupAsFile(uri, false);
-                        return data.data;
-                    }
+                    && uri.toString().includes(WebExtensionContext.rootDirectory.toString())
+                    && pathHasEntityFolderName(uri.toString())
+                ) {
+                    WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_FILE_TRIGGERED); // No-op
                 }
             }
         }
+
         return new Uint8Array();
     }
 
@@ -151,15 +153,19 @@ export class PortalsFS implements vscode.FileSystemProvider {
 
     // --- manage files/folders
     async createDirectory(uri: vscode.Uri): Promise<void> {
-        const basename = path.posix.basename(uri.path);
-        const dirname = uri.with({ path: path.posix.dirname(uri.path) });
-        const parent = await this._lookupAsDirectory(dirname, false);
+        // Do silent lookup to check for existing entry
+        let entry = await this._lookup(uri, true);
+        if (!entry) {
+            const basename = path.posix.basename(uri.path);
+            const dirname = uri.with({ path: path.posix.dirname(uri.path) });
+            const parent = await this._lookupAsDirectory(dirname, false);
 
-        const entry = new Directory(basename);
-        parent.entries.set(entry.name, entry);
-        parent.mtime = Date.now();
-        parent.size += 1;
-        this._fireSoon({ type: vscode.FileChangeType.Changed, uri: dirname }, { type: vscode.FileChangeType.Created, uri });
+            entry = new Directory(basename);
+            parent.entries.set(entry.name, entry);
+            parent.mtime = Date.now();
+            parent.size += 1;
+            this._fireSoon({ type: vscode.FileChangeType.Changed, uri: dirname }, { type: vscode.FileChangeType.Created, uri });
+        }
     }
 
     async rename(): Promise<void> {
@@ -246,7 +252,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
     }
 
     // --- VFS calls
-    private async createFileSystem(portalsFS: PortalsFS, portalFolderName: string) {
+    private async createFileSystem(portalFolderName: string) {
         if (portalFolderName.length === 0) {
             WebExtensionContext.telemetry.sendErrorTelemetry(telemetryEventNames.WEB_EXTENSION_EMPTY_PORTAL_FOLDER_NAME);
             throw new Error(ERRORS.PORTAL_FOLDER_NAME_EMPTY);
@@ -254,29 +260,40 @@ export class PortalsFS implements vscode.FileSystemProvider {
 
         WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_CREATE_ROOT_FOLDER);
 
-        await portalsFS.createDirectory(vscode.Uri.parse(`${PORTALS_URI_SCHEME}:/${portalFolderName}/`, true));
+        await this.createDirectory(vscode.Uri.parse(`${PORTALS_URI_SCHEME}:/${portalFolderName}/`, true));
         vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: vscode.Uri.parse(`${PORTALS_URI_SCHEME}:/${portalFolderName}/`), name: portalFolderName });
+
+        await this.createEntityFolder(portalFolderName);
+    }
+
+    private async createEntityFolder(portalFolderName: string) {
+        const entityDetails = getEntity(WebExtensionContext.defaultEntityType);
+        const exportType = entityDetails?.get(schemaEntityKey.EXPORT_TYPE);
+        const subUri = entityDetails?.get(schemaEntityKey.FILE_FOLDER_NAME);
+
+        if (subUri?.length === 0) {
+            throw new Error(ERRORS.SUBURI_EMPTY);
+        }
+        WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_CREATE_ENTITY_FOLDER);
+
+        let filePathInPortalFS = '';
+        if (exportType && (exportType === folderExportType.SubFolders || exportType === folderExportType.SingleFolder)) {
+            filePathInPortalFS = `${PORTALS_URI_SCHEME}:/${portalFolderName}/${subUri}/`;
+            await this.createDirectory(vscode.Uri.parse(filePathInPortalFS, true));
+        }
     }
 
     // --- Dataverse calls
-
     private async _loadFromDataverseToVFS() {
         await WebExtensionContext.authenticateAndUpdateDataverseProperties();
-        await this.createFileSystem(this, WebExtensionContext.urlParametersMap.get(queryParameters.WEBSITE_NAME) as string);
+        await this.createFileSystem(WebExtensionContext.urlParametersMap.get(queryParameters.WEBSITE_NAME) as string);
 
         if (!WebExtensionContext.dataverseAccessToken) {
             WebExtensionContext.telemetry.sendErrorTelemetry(telemetryEventNames.WEB_EXTENSION_DATAVERSE_AUTHENTICATION_MISSING);
             throw vscode.FileSystemError.NoPermissions();
         }
 
-        await fetchDataFromDataverseAndUpdateVFS(
-            WebExtensionContext.dataverseAccessToken,
-            WebExtensionContext.defaultEntityType,
-            WebExtensionContext.defaultEntityId,
-            WebExtensionContext.urlParametersMap,
-            WebExtensionContext.languageIdCodeMap,
-            this,
-            WebExtensionContext.websiteIdToLanguage);
+        await fetchDataFromDataverseAndUpdateVFS(this);
     }
 
     private async _saveFileToDataverseFromVFS(uri: vscode.Uri) {

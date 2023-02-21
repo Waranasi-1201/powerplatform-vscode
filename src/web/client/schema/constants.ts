@@ -14,11 +14,13 @@ export enum schemaKey {
 
 export enum schemaEntityKey {
     FILE_NAME_FIELD = '_primarynamefield',
+    FILE_ID_FIELD = '_primaryidfield',
     FILE_FOLDER_NAME = '_foldername',
     LANGUAGE_FIELD = '_languagefield',
     ATTRIBUTES_EXTENSION = '_attributesExtension',
     DATAVERSE_ENTITY_NAME = '_dataverseenityname',
     FETCH_QUERY_PARAMETERS = '_fetchQueryParameters',
+    MULTI_FILE_FETCH_QUERY_PARAMETERS = '_multiFileFetchQueryParameters',
     MAPPING_ENTITY_ID = '_mappingEntityId',
     MAPPING_ATTRIBUTE_FETCH_QUERY = '_mappingAttributeFetchQuery',
     EXPORT_TYPE = '_exporttype',

@@ -7,7 +7,7 @@
 export const PORTAL_LANGUAGE_DEFAULT = '1033';
 export const PORTALS_FOLDER_NAME_DEFAULT = 'site';
 export const PORTALS_URI_SCHEME = 'powerplatform-vfs';
-export const DEFAULT_LANGUAGE_CODE = ' ';
+export const DEFAULT_LANGUAGE_CODE = '';
 export const NO_CONTENT = ' ';
 export const EMPTY_FILE_NAME = 'defaultfilename';
 export const CHARSET = 'utf-8';
@@ -19,6 +19,9 @@ export const PUBLIC = 'public';
 export const MIMETYPE = 'mimetype';
 export const IS_FIRST_RUN_EXPERIENCE = 'isFirstRunExperience';
 export const ODATA_ETAG = "@odata.etag";
+
+// Multi-file feature constants
+export const MULTI_FILE_FEATURE = true;
 
 export enum initializationEntityName {
     WEBSITE = "websites",

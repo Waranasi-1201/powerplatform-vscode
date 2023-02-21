@@ -75,6 +75,32 @@ export function getLanguageIdCodeMap(result: any, schema: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getPortalLanguageIdCodeMap(result: any, schema: string) {
+    const languageIdCodeMap = new Map<string, string>();
+    if (result) {
+        if (result.value?.length > 0) {
+            if (schema.toLowerCase() === portal_schema_V2.entities.dataSourceProperties.schema) {
+                for (let counter = 0; counter < result.value.length; counter++) {
+                    const lcid = result.value[counter].lcid ?
+                        result.value[counter].lcid :
+                        Constants.PORTAL_LANGUAGE_DEFAULT;
+                    const languagecode = result.value[counter].languagecode;
+                    languageIdCodeMap.set(lcid.toString(), languagecode);
+                }
+            } else {
+                for (let counter = 0; counter < result.value.length; counter++) {
+                    const adx_portallanguageid = result.value[counter].adx_portallanguageid ? result.value[counter].adx_portallanguageid : Constants.DEFAULT_LANGUAGE_CODE;
+                    const adx_languagecode = result.value[counter].adx_languagecode;
+                    languageIdCodeMap.set(adx_portallanguageid, adx_languagecode);
+                }
+            }
+        }
+    }
+
+    return languageIdCodeMap;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getWebsiteIdToLanguageMap(result: any, schema: string) {
     const websiteIdToLanguage = new Map<string, string>();
     if (result) {
@@ -110,7 +136,7 @@ export function getwebsiteLanguageIdToPortalLanguageMap(result: any, schema: str
                 }
             } else {
                 for (let counter = 0; counter < result.value.length; counter++) {
-                    const adx_portalLanguageId_value = result.value[counter].adx_portallanguageid_value ? result.value[counter].adx_portallanguageid_value : Constants.PORTAL_LANGUAGE_DEFAULT;
+                    const adx_portalLanguageId_value = result.value[counter]._adx_portallanguageid_value ? result.value[counter]._adx_portallanguageid_value : Constants.PORTAL_LANGUAGE_DEFAULT;
                     const adx_websitelanguageid = result.value[counter].adx_websitelanguageid;
                     websiteLanguageIdToPortalLanguageMap.set(adx_websitelanguageid, adx_portalLanguageId_value);
                 }

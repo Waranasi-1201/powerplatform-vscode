@@ -9,7 +9,7 @@ import { dataverseAuthentication, getHeader } from "./common/authenticationProvi
 import * as Constants from "./common/constants";
 import { getDataSourcePropertiesMap, getEntitiesFolderNameMap, getEntitiesSchemaMap } from "./schema/portalSchemaReader";
 import { WebExtensionTelemetry } from "./telemetry/webExtensionTelemetry";
-import { getLanguageIdCodeMap, getWebsiteIdToLanguageMap, getwebsiteLanguageIdToPortalLanguageMap, IAttributePath } from "./utilities/schemaHelperUtil";
+import { getLanguageIdCodeMap, getPortalLanguageIdCodeMap, getWebsiteIdToLanguageMap, getwebsiteLanguageIdToPortalLanguageMap, IAttributePath } from "./utilities/schemaHelperUtil";
 import { getCustomRequestURL } from "./utilities/urlBuilderUtil";
 import { schemaKey } from "./schema/constants";
 import { telemetryEventNames } from "./telemetry/constants";
@@ -27,6 +27,7 @@ export interface IWebExtensionContext {
 
     // Language maps from dataverse
     languageIdCodeMap: Map<string, string>,
+    portalLanguageIdCodeMap: Map<string, string>,
     websiteLanguageIdToPortalLanguageMap: Map<string, string>,
     websiteIdToLanguage: Map<string, string>,
 
@@ -50,6 +51,7 @@ class WebExtensionContext implements IWebExtensionContext {
     private _entitiesFolderNameMap: Map<string, string>;
     private _urlParametersMap: Map<string, string>;
     private _languageIdCodeMap: Map<string, string>;
+    private _portalLanguageIdCodeMap: Map<string, string>;
     private _websiteLanguageIdToPortalLanguageMap: Map<string, string>;
     private _websiteIdToLanguage: Map<string, string>;
     private _rootDirectory: vscode.Uri;
@@ -68,6 +70,7 @@ class WebExtensionContext implements IWebExtensionContext {
     public get entitiesFolderNameMap() { return this._entitiesFolderNameMap; }
     public get urlParametersMap() { return this._urlParametersMap; }
     public get languageIdCodeMap() { return this._languageIdCodeMap; }
+    public get portalLanguageIdCodeMap() { return this._portalLanguageIdCodeMap; }
     public get websiteLanguageIdToPortalLanguageMap() { return this._websiteLanguageIdToPortalLanguageMap; }
     public get websiteIdToLanguage() { return this._websiteIdToLanguage; }
     public get rootDirectory() { return this._rootDirectory; }
@@ -85,6 +88,7 @@ class WebExtensionContext implements IWebExtensionContext {
         this._schemaDataSourcePropertiesMap = new Map<string, string>();
         this._schemaEntitiesMap = new Map<string, Map<string, string>>();
         this._languageIdCodeMap = new Map<string, string>();
+        this._portalLanguageIdCodeMap = new Map<string, string>();
         this._websiteLanguageIdToPortalLanguageMap = new Map<string, string>();
         this._websiteIdToLanguage = new Map<string, string>();
         this._urlParametersMap = new Map<string, string>();
@@ -123,9 +127,9 @@ class WebExtensionContext implements IWebExtensionContext {
         const schema = this.urlParametersMap.get(schemaKey.SCHEMA_VERSION)?.toLowerCase() as string;
 
         if (accessToken) {
-            this._websiteIdToLanguage = await this.populateWebsiteIdToLanguageMap(accessToken, dataverseOrgUrl, schema);
-            this._websiteLanguageIdToPortalLanguageMap = await this.populateWebsiteLanguageIdToPortalLanguageMap(accessToken, dataverseOrgUrl, schema);
-            this._languageIdCodeMap = await this.populateLanguageIdToCode(accessToken, dataverseOrgUrl, schema);
+            await this.populateWebsiteIdToLanguageMap(accessToken, dataverseOrgUrl, schema);
+            await this.populateWebsiteLanguageIdToPortalLanguageMap(accessToken, dataverseOrgUrl, schema);
+            await this.populateLanguageIdToCode(accessToken, dataverseOrgUrl, schema);
             this._dataverseAccessToken = accessToken;
         }
     }
@@ -178,10 +182,9 @@ class WebExtensionContext implements IWebExtensionContext {
         this._defaultFileUri = uri
     }
 
-    private async populateLanguageIdToCode(accessToken: string, dataverseOrgUrl: string, schema: string): Promise<Map<string, string>> {
+    private async populateLanguageIdToCode(accessToken: string, dataverseOrgUrl: string, schema: string) {
         let requestUrl = '';
         let requestSentAtTime = new Date().getTime();
-        let languageIdCodeMap = new Map<string, string>();
         const languageEntityName = Constants.initializationEntityName.PORTALLANGUAGE;
 
         try {
@@ -197,19 +200,17 @@ class WebExtensionContext implements IWebExtensionContext {
             }
             this.telemetry.sendAPISuccessTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
-            languageIdCodeMap = getLanguageIdCodeMap(result, schema);
-
+            this._languageIdCodeMap = getLanguageIdCodeMap(result, schema);
+            this._portalLanguageIdCodeMap = getPortalLanguageIdCodeMap(result, schema);
         } catch (error) {
             const errorMsg = (error as Error)?.message;
             this.telemetry.sendAPIFailureTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
         }
-        return languageIdCodeMap;
     }
 
-    private async populateWebsiteLanguageIdToPortalLanguageMap(accessToken: string, dataverseOrgUrl: string, schema: string): Promise<Map<string, string>> {
+    private async populateWebsiteLanguageIdToPortalLanguageMap(accessToken: string, dataverseOrgUrl: string, schema: string) {
         let requestUrl = '';
         let requestSentAtTime = new Date().getTime();
-        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>();
         const languageEntityName = Constants.initializationEntityName.WEBSITELANGUAGE;
 
         try {
@@ -225,18 +226,16 @@ class WebExtensionContext implements IWebExtensionContext {
             }
             this.telemetry.sendAPISuccessTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
-            getwebsiteLanguageIdToPortalLanguageMap(result, schema);
+            this._websiteLanguageIdToPortalLanguageMap = getwebsiteLanguageIdToPortalLanguageMap(result, schema);
         } catch (error) {
             const errorMsg = (error as Error)?.message;
             this.telemetry.sendAPIFailureTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
         }
-        return websiteLanguageIdToPortalLanguageMap;
     }
 
-    private async populateWebsiteIdToLanguageMap(accessToken: string, dataverseOrgUrl: string, schema: string): Promise<Map<string, string>> {
+    private async populateWebsiteIdToLanguageMap(accessToken: string, dataverseOrgUrl: string, schema: string) {
         let requestUrl = '';
         let requestSentAtTime = new Date().getTime();
-        let websiteIdToLanguage = new Map<string, string>();
         const websiteEntityName = Constants.initializationEntityName.WEBSITE;
 
         try {
@@ -254,13 +253,12 @@ class WebExtensionContext implements IWebExtensionContext {
             this.telemetry.sendAPISuccessTelemetry(requestUrl, websiteEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
 
-            websiteIdToLanguage = getWebsiteIdToLanguageMap(result, schema);
+            this._websiteIdToLanguage = getWebsiteIdToLanguageMap(result, schema);
 
         } catch (error) {
             const errorMsg = (error as Error)?.message;
             this.telemetry.sendAPIFailureTelemetry(requestUrl, websiteEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
         }
-        return websiteIdToLanguage;
     }
 }
 

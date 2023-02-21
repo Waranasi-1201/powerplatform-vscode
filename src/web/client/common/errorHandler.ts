@@ -48,7 +48,10 @@ export const ERRORS = {
     MANDATORY_PARAMETERS_NULL_DESC: "Check the URL and verify the parameters are correct",
     FILE_NAME_NOT_SET: "That file is not available",
     FILE_NAME_NOT_SET_DESC: "The metadata may have changed in the Dataverse side. Contact your admin. {message_attribute}",
-    FILE_NAME_EMPTY: "File name is empty"
+    FILE_NAME_EMPTY: "File name is empty",
+    FILE_ID_EMPTY: "File ID is empty",
+    LANGUAGE_CODE_ID_VALUE_NULL: "Language code ID is empty",
+    LANGUAGE_CODE_EMPTY: "Language code is empty",
 };
 
 export function showErrorDialog(errorString: string, detailMessage?: string) {

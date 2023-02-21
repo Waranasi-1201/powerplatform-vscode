@@ -21,52 +21,48 @@ import WebExtensionContext from "../WebExtensionContext";
 import { telemetryEventNames } from '../telemetry/constants';
 import { folderExportType, schemaEntityKey } from '../schema/constants';
 
-export async function fetchDataFromDataverseAndUpdateVFS(
-    accessToken: string,
-    entityName: string,
-    entityId: string,
-    queryParamsMap: Map<string, string>,
-    languageIdCodeMap: Map<string, string>,
-    portalFs: PortalsFS,
-    websiteIdToLanguage: Map<string, string>
-) {
+export async function fetchDataFromDataverseAndUpdateVFS(portalFs: PortalsFS) {
     let requestUrl = '';
     let requestSentAtTime = new Date().getTime();
     try {
-        const dataverseOrgUrl = queryParamsMap.get(Constants.queryParameters.ORG_URL) as string;
+        const dataverseOrgUrl = WebExtensionContext.urlParametersMap.get(Constants.queryParameters.ORG_URL) as string;
 
-        requestUrl = getRequestURL(dataverseOrgUrl, entityName, entityId, Constants.httpMethod.GET, false);
-        WebExtensionContext.telemetry.sendAPITelemetry(requestUrl, entityName, Constants.httpMethod.GET);
+        requestUrl = getRequestURL(dataverseOrgUrl, WebExtensionContext.defaultEntityType, WebExtensionContext.defaultEntityId, Constants.httpMethod.GET, false);
+        WebExtensionContext.telemetry.sendAPITelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET);
 
         requestSentAtTime = new Date().getTime();
         const response = await fetch(requestUrl, {
-            headers: getHeader(accessToken),
+            headers: getHeader(WebExtensionContext.dataverseAccessToken),
         });
 
         if (!response.ok) {
             vscode.window.showErrorMessage(localize("microsoft-powerapps-portals.webExtension.fetch.file.error", "Failed to fetch file content."));
-            WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, entityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, JSON.stringify(response));
+            WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, JSON.stringify(response));
             throw new Error(response.statusText);
         }
-       
-        WebExtensionContext.telemetry.sendAPISuccessTelemetry(requestUrl, entityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
+
+        WebExtensionContext.telemetry.sendAPISuccessTelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
 
         const result = await response.json();
         const data = result.value;
-        
+        console.log(data.length);
+
         if (!data) {
             vscode.window.showErrorMessage("microsoft-powerapps-portals.webExtension.fetch.nocontent.error", "There was no response.");
             throw new Error(ERRORS.EMPTY_RESPONSE);
         }
 
         for (let counter = 0; counter < data.length; counter++) {
-            await createContentFiles(data[counter], entityName, queryParamsMap, languageIdCodeMap, portalFs, entityId, websiteIdToLanguage, accessToken, dataverseOrgUrl);
+            await createContentFiles(data[counter],
+                WebExtensionContext.defaultEntityType, // TODO: Need to handle multiple entities
+                portalFs,
+                dataverseOrgUrl);
         }
     } catch (error) {
         const errorMsg = (error as Error)?.message;
         showErrorDialog(localize("microsoft-powerapps-portals.webExtension.fetch.file", "There was a problem opening the workspace"),
             localize("microsoft-powerapps-portals.webExtension.fetch.file.desc", "We encountered an error preparing the file for edit."));
-        WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, entityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
+        WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
     }
 }
 
@@ -74,64 +70,75 @@ async function createContentFiles(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result: any,
     entityName: string,
-    queryParamsMap: Map<string, string>,
-    languageIdCodeMap: Map<string, string>,
     portalsFS: PortalsFS,
-    entityId: string,
-    websiteIdToLanguage: Map<string, string>,
-    accessToken: string,
     dataverseOrgUrl: string
 ) {
     try {
-        let lcid: string | undefined = websiteIdToLanguage.get(queryParamsMap.get(Constants.queryParameters.WEBSITE_ID) as string) ?? '';
+        // Website default lcid : language code. Ex: 1033 : en-us
+        const lcid = WebExtensionContext.websiteIdToLanguage.get(WebExtensionContext.urlParametersMap.get(Constants.queryParameters.WEBSITE_ID) as string) ?? '';
         WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_EDIT_LCID,
             { 'lcid': (lcid ? lcid.toString() : '') });
+        let languageCode = WebExtensionContext.languageIdCodeMap.get(lcid) as string;
 
+        // Get entity schema details
         const entityDetails = getEntity(entityName);
         const attributes = entityDetails?.get(schemaEntityKey.ATTRIBUTES);
         const attributeExtension = entityDetails?.get(schemaEntityKey.ATTRIBUTES_EXTENSION);
         const mappingEntityFetchQuery = entityDetails?.get(schemaEntityKey.MAPPING_ATTRIBUTE_FETCH_QUERY);
         const exportType = entityDetails?.get(schemaEntityKey.EXPORT_TYPE);
-        const portalFolderName = queryParamsMap.get(Constants.queryParameters.WEBSITE_NAME) as string;
+        const portalFolderName = WebExtensionContext.urlParametersMap.get(Constants.queryParameters.WEBSITE_NAME) as string;
         const subUri = entityDetails?.get(schemaEntityKey.FILE_FOLDER_NAME);
+        const fetchedFileName = entityDetails?.get(schemaEntityKey.FILE_NAME_FIELD);
+        const fetchedFileId = entityDetails?.get(schemaEntityKey.FILE_ID_FIELD);
 
+        // Validate entity schema details
         if (subUri?.length === 0) {
             throw new Error(ERRORS.SUBURI_EMPTY);
-        }
-
-        let filePathInPortalFS = '';
-        if (exportType && (exportType === folderExportType.SubFolders || exportType === folderExportType.SingleFolder)) {
-            filePathInPortalFS = `${Constants.PORTALS_URI_SCHEME}:/${portalFolderName}/${subUri}/`;
-            await portalsFS.createDirectory(vscode.Uri.parse(filePathInPortalFS, true));
         }
 
         if (!attributes || !attributeExtension) {
             throw new Error(ERRORS.ATTRIBUTES_EMPTY);
         }
 
-        const fetchedFileName = entityDetails?.get(schemaEntityKey.FILE_NAME_FIELD);
+        const entityId = fetchedFileId ? result[fetchedFileId] : null;
+        if (!entityId) {
+            throw new Error(ERRORS.FILE_ID_EMPTY);
+        }
+
         const fileName = fetchedFileName ? result[fetchedFileName] : Constants.EMPTY_FILE_NAME;
-      
         if (fileName === Constants.EMPTY_FILE_NAME) {
             throw new Error(ERRORS.FILE_NAME_EMPTY);
         }
 
+        // Create folder paths
+        let filePathInPortalFS = '';
         if (exportType && (exportType === folderExportType.SubFolders)) {
             filePathInPortalFS = `${Constants.PORTALS_URI_SCHEME}:/${portalFolderName}/${subUri}/${fileName}/`;
             await portalsFS.createDirectory(vscode.Uri.parse(filePathInPortalFS, true));
         }
 
         const languageCodeAttribute = entityDetails?.get(schemaEntityKey.LANGUAGE_FIELD);
-        lcid = languageCodeAttribute && result[languageCodeAttribute] ? websiteIdToLanguage.get(result[languageCodeAttribute]) : lcid;
+        if (languageCodeAttribute && result[languageCodeAttribute] === null) {
+            throw new Error(ERRORS.LANGUAGE_CODE_ID_VALUE_NULL);
+        }
 
-        const languageCode = languageIdCodeMap?.size && lcid ? languageIdCodeMap.get(lcid) as string : Constants.DEFAULT_LANGUAGE_CODE;
+        if (languageCodeAttribute && result[languageCodeAttribute]) {
+            const portalLanguageId = WebExtensionContext.websiteLanguageIdToPortalLanguageMap.get(result[languageCodeAttribute]);
+            languageCode = WebExtensionContext.portalLanguageIdCodeMap.get(portalLanguageId as string) as string;
+        }
+
+        if (languageCode === Constants.DEFAULT_LANGUAGE_CODE) {
+            throw new Error(ERRORS.LANGUAGE_CODE_EMPTY);
+        }
+
         WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_EDIT_LANGUAGE_CODE,
-            { 'languageCode': (languageCode ? languageCode.toString() : '') });
+            { 'languageCode': languageCode.toString() });
 
         const attributeArray = attributes.split(',');
         const attributeExtensionMap = attributeExtension as unknown as Map<string, string>;
         let counter = 0;
 
+        // Create file content
         let fileUri = '';
         for (counter; counter < attributeArray.length; counter++) {
             const base64Encoded: boolean = isBase64Encoded(entityName, attributeArray[counter]); // update func for webfiles for V2
@@ -146,7 +153,7 @@ async function createContentFiles(
                     attributeArray[counter],
                     entityName,
                     entityId,
-                    accessToken,
+                    WebExtensionContext.dataverseAccessToken,
                     dataverseOrgUrl
                 );
             }
@@ -172,12 +179,14 @@ async function createContentFiles(
                 result[Constants.MIMETYPE]);
         }
 
-        await WebExtensionContext.updateSingleFileUrisInContext(vscode.Uri.parse(fileUri));
+        if (Constants.MULTI_FILE_FEATURE && entityId === WebExtensionContext.defaultEntityId) {
+            await WebExtensionContext.updateSingleFileUrisInContext(vscode.Uri.parse(fileUri));
 
-        // Not awaited intentionally
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(fileUri), { background: true, preview: false });
-        WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_VSCODE_START_COMMAND,
-            { 'commandId': 'vscode.open', 'type': 'file' });
+            // Not awaited intentionally
+            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(fileUri), { background: true, preview: false });
+            WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_VSCODE_START_COMMAND,
+                { 'commandId': 'vscode.open', 'type': 'file' });
+        }
     } catch (error) {
         const errorMsg = (error as Error)?.message;
         vscode.window.showErrorMessage(localize("microsoft-powerapps-portals.webExtension.fetch.authorization.error", "Failed to get file ready for edit."));

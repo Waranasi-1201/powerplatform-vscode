@@ -12,7 +12,7 @@ import { PortalsFS } from "./dal/fileSystemProvider";
 import { checkMandatoryParameters, removeEncodingFromParameters } from "./common/errorHandler";
 import { WebExtensionTelemetry } from './telemetry/webExtensionTelemetry';
 import { convertStringtoBase64 } from './utilities/commonUtil';
-import {NPSService} from './services/NPSService'
+import { NPSService } from './services/NPSService'
 import { vscodeExtAppInsightsResourceProvider } from '../../common/telemetry-generated/telemetryConfiguration';
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext): void {
                                 cancellable: true,
                                 title: localize("microsoft-powerapps-portals.webExtension.fetch.file.message", "Fetching your file ...")
                             }, async () => {
-                                await vscode.workspace.fs.readDirectory(WebExtensionContext.rootDirectory);
+                                await portalsFS.readDirectory(WebExtensionContext.rootDirectory, true);
                             });
                         }
                             break;
