@@ -32,4 +32,8 @@ export enum telemetryEventNames {
     NPS_AUTHENTICATION_COMPLETED = 'WebExtensionNPSAuthenticationCompleted',
     NPS_AUTHENTICATION_FAILED = 'WebExtensionNPSAuthenticationFailed',
     WEB_EXTENSION_CREATE_ENTITY_FOLDER = 'WebExtensionCreateEntityFolder',
+    NPS_USER_ELIGIBLE = "WebExtensionUserIsEligible",
+    NPS_API_FAILED = "WebExtensionNPSApiFailed",
+    RENDER_NPS = 'WebExtensionNPSRenderSurveyForm',
+    RENDER_NPS_FAILED = 'WebExtensionNPSRenderSurveyFormFailed'
 }

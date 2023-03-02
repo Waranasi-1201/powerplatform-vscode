@@ -5,8 +5,6 @@
 
 import * as vscode from 'vscode';
 import fetch from 'node-fetch'
-import * as nls from 'vscode-nls';
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 import { convertfromBase64ToString, GetFileNameWithExtension } from '../utilities/commonUtil';
 import {
     getRequestURL,
@@ -36,7 +34,7 @@ export async function fetchDataFromDataverseAndUpdateVFS(portalFs: PortalsFS) {
         });
 
         if (!response.ok) {
-            vscode.window.showErrorMessage(localize("microsoft-powerapps-portals.webExtension.fetch.file.error", "Failed to fetch file content."));
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to fetch file content."));
             WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, JSON.stringify(response));
             throw new Error(response.statusText);
         }
@@ -47,8 +45,9 @@ export async function fetchDataFromDataverseAndUpdateVFS(portalFs: PortalsFS) {
         const data = result.value;
         console.log(data.length);
 
+
         if (!data) {
-            vscode.window.showErrorMessage("microsoft-powerapps-portals.webExtension.fetch.nocontent.error", "There was no response.");
+            vscode.window.showErrorMessage("microsoft-powerapps-portals.webExtension.fetch.nocontent.error", "Response data is empty");
             throw new Error(ERRORS.EMPTY_RESPONSE);
         }
 
@@ -60,9 +59,10 @@ export async function fetchDataFromDataverseAndUpdateVFS(portalFs: PortalsFS) {
         }
     } catch (error) {
         const errorMsg = (error as Error)?.message;
-        showErrorDialog(localize("microsoft-powerapps-portals.webExtension.fetch.file", "There was a problem opening the workspace"),
-            localize("microsoft-powerapps-portals.webExtension.fetch.file.desc", "We encountered an error preparing the file for edit."));
+        showErrorDialog(vscode.l10n.t("There was a problem opening the workspace"),
+            vscode.l10n.t("We encountered an error preparing the file for edit."));
         WebExtensionContext.telemetry.sendAPIFailureTelemetry(requestUrl, WebExtensionContext.defaultEntityType, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
+
     }
 }
 
@@ -189,7 +189,7 @@ async function createContentFiles(
         }
     } catch (error) {
         const errorMsg = (error as Error)?.message;
-        vscode.window.showErrorMessage(localize("microsoft-powerapps-portals.webExtension.fetch.authorization.error", "Failed to get file ready for edit."));
+        vscode.window.showErrorMessage(vscode.l10n.t("Failed to get file ready for edit."));
         WebExtensionContext.telemetry.sendErrorTelemetry(telemetryEventNames.WEB_EXTENSION_CONTENT_FILE_CREATION_FAILED, errorMsg);
     }
 
