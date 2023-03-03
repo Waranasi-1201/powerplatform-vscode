@@ -179,7 +179,7 @@ async function createContentFiles(
                 result[Constants.MIMETYPE]);
         }
 
-        if (Constants.MULTI_FILE_FEATURE && entityId === WebExtensionContext.defaultEntityId) {
+        if (Constants.ENABLE_MULTI_FILE_FEATURE && entityId === WebExtensionContext.defaultEntityId) {
             await WebExtensionContext.updateSingleFileUrisInContext(vscode.Uri.parse(fileUri));
 
             // Not awaited intentionally

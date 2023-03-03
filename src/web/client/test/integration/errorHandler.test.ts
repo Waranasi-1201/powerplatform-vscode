@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import Sinon, { stub, assert, spy } from "sinon";
 import { expect } from "chai";
-import powerPlatformExtensionContext from "../../../client/WebExtensionContext";
+import WebExtensionContext from "../../../client/WebExtensionContext";
 import { schemaKey } from "../../schema/constants";
 import { telemetryEventNames } from "../../telemetry/constants";
 
@@ -338,7 +338,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorDialog = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
         const appName = "portal";
@@ -365,7 +365,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorDialog = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
         const appName = "portal";
@@ -425,7 +425,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorMessage = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
 
@@ -463,7 +463,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorMessage = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
         const appName = "portal";
@@ -500,7 +500,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorMessage = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
         const appName = "portal";
@@ -537,7 +537,7 @@ describe("errorHandler", () => {
         //Act
         const _mockShowErrorMessage = spy(vscode.window, "showErrorMessage");
         const _mockSendErrorTelemetry = spy(
-            powerPlatformExtensionContext.telemetry,
+            WebExtensionContext.telemetry,
             "sendErrorTelemetry"
         );
         const appName = "portal";

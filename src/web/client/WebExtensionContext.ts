@@ -43,6 +43,12 @@ export interface IWebExtensionContext {
     entityDataMap: EntityDataMap,
     isContextSet: boolean,
     currentSchemaVersion: string,
+
+    // Telemetry and survey
+    telemetry: WebExtensionTelemetry;
+    npsEligibility: boolean;
+    userId: string;
+
 }
 
 class WebExtensionContext implements IWebExtensionContext {
@@ -108,7 +114,7 @@ class WebExtensionContext implements IWebExtensionContext {
         this._currentSchemaVersion = "";
         this._telemetry = new WebExtensionTelemetry();
         this._npsEligibility = false;
-        this._userId =  "";
+        this._userId = "";
     }
 
     public setWebExtensionContext(entityName: string, entityId: string, queryParamsMap: Map<string, string>) {
@@ -269,10 +275,10 @@ class WebExtensionContext implements IWebExtensionContext {
 
     public setNPSEligibility(eligibility: boolean) {
         this._npsEligibility = eligibility;
-    } 
+    }
     public setUserId(uid: string) {
         this._userId = uid;
-    } 
+    }
 }
 
 export default new WebExtensionContext();

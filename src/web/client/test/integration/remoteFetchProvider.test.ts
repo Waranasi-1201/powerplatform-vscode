@@ -24,11 +24,9 @@ describe("remoteFetchProvider", () => {
     afterEach(() => {
         sinon.restore();
     });
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccess_shouldCallAllSuccessFunction", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccess_shouldCallAllSuccessFunction", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
         const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -45,12 +43,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -200,9 +193,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessButDataIsNull_shouldCallShowErrorMessage", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -219,12 +209,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -267,9 +252,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeNotSuccess_shouldCallShowErrorMessage", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -287,12 +269,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: false,
             statusText: "statusText",
@@ -339,9 +316,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndSubUriIsBlank_shouldThrowError", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -358,12 +332,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -414,9 +383,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndAttributesIsBlank_shouldThrowError", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -433,12 +399,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -491,9 +452,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndAttributeExtensionIsBlank_shouldThrowError", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -510,12 +468,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -569,9 +522,6 @@ describe("remoteFetchProvider", () => {
 
     it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndFileNameIsDefaultfilename_shouldThrowError", async () => {
         //Act
-        // const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
-        // const entityName = "webpages";
-        // const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -588,12 +538,7 @@ describe("remoteFetchProvider", () => {
             queryParamsMap
         );
 
-        // const languageIdCodeMap = new Map<string, string>([["En", "english"]]);
         const portalFs = new PortalsFS();
-        // const websiteIdToLanguage = new Map<string, string>([
-        //     ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "En"],
-        // ]);
-
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",

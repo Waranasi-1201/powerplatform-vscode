@@ -68,7 +68,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
         return await this._lookup(uri, false);
     }
 
-    async readDirectory(uri: vscode.Uri, callFromExtensionActivate = false): Promise<[string, vscode.FileType][]> {
+    async readDirectory(uri: vscode.Uri, isExtensionActivateEvent = false): Promise<[string, vscode.FileType][]> {
         const result: [string, vscode.FileType][] = [];
         try {
             const entry = await this._lookupAsDirectory(uri, false);
@@ -79,8 +79,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
             const castedError = error as vscode.FileSystemError;
 
             if (castedError.code === vscode.FileSystemError.FileNotFound.name) {
-                if (callFromExtensionActivate &&
-                    WebExtensionContext.isContextSet &&
+                if (isExtensionActivateEvent &&
                     uri.toString().toLowerCase() === WebExtensionContext.rootDirectory.toString().toLowerCase()
                 ) {
                     WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_DIRECTORY_TRIGGERED);
@@ -88,6 +87,7 @@ export class PortalsFS implements vscode.FileSystemProvider {
                 }
             }
         }
+
         return result;
     }
 
@@ -105,7 +105,10 @@ export class PortalsFS implements vscode.FileSystemProvider {
                     && uri.toString().includes(WebExtensionContext.rootDirectory.toString())
                     && pathHasEntityFolderName(uri.toString())
                 ) {
-                    WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_FILE_TRIGGERED); // No-op
+                    WebExtensionContext.telemetry.sendInfoTelemetry(telemetryEventNames.WEB_EXTENSION_FETCH_FILE_TRIGGERED);
+
+                    // No-op
+                    return new TextEncoder().encode(vscode.l10n.t("Loading your file ..."));
                 }
             }
         }

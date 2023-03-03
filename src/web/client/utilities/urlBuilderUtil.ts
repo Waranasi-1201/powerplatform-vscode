@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { httpMethod, MULTI_FILE_FEATURE, queryParameters } from "../common/constants";
+import { httpMethod, ENABLE_MULTI_FILE_FEATURE, queryParameters } from "../common/constants";
 import WebExtensionContext from "../WebExtensionContext";
 import { entityAttributesWithBase64Encoding, schemaEntityKey, schemaEntityName, schemaKey } from "../schema/constants";
 import { getEntity } from "./schemaHelperUtil";
@@ -28,7 +28,7 @@ export function getRequestURL(
     switch (method) {
         case httpMethod.GET:
             parameterizedUrlTemplate = parameterizedUrlTemplate
-                + (attributeQueryParameters ?? getEntity(entity)?.get(MULTI_FILE_FEATURE ? schemaEntityKey.MULTI_FILE_FETCH_QUERY_PARAMETERS : schemaEntityKey.FETCH_QUERY_PARAMETERS));
+                + (attributeQueryParameters ?? getEntity(entity)?.get(ENABLE_MULTI_FILE_FEATURE ? schemaEntityKey.MULTI_FILE_FETCH_QUERY_PARAMETERS : schemaEntityKey.FETCH_QUERY_PARAMETERS));
             break;
         default:
             break;
