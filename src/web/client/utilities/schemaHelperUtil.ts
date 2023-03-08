@@ -49,7 +49,7 @@ export function isWebFileV2(entity: string, attributeType: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getLanguageIdCodeMap(result: any, schema: string) {
+export function getLcidCodeMap(result: any, schema: string) {
     const languageIdCodeMap = new Map<string, string>();
     if (result) {
         if (result.value?.length > 0) {
@@ -75,8 +75,8 @@ export function getLanguageIdCodeMap(result: any, schema: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getPortalLanguageIdCodeMap(result: any, schema: string) {
-    const languageIdCodeMap = new Map<string, string>();
+export function getPortalLanguageIdToLcidMap(result: any, schema: string) {
+    const portalLanguageIdCodeMap = new Map<string, string>();
     if (result) {
         if (result.value?.length > 0) {
             if (schema.toLowerCase() === portal_schema_V2.entities.dataSourceProperties.schema) {
@@ -85,23 +85,23 @@ export function getPortalLanguageIdCodeMap(result: any, schema: string) {
                         result.value[counter].lcid :
                         Constants.PORTAL_LANGUAGE_DEFAULT;
                     const languagecode = result.value[counter].languagecode;
-                    languageIdCodeMap.set(lcid.toString(), languagecode);
+                    portalLanguageIdCodeMap.set(lcid.toString(), languagecode);
                 }
             } else {
                 for (let counter = 0; counter < result.value.length; counter++) {
                     const adx_portallanguageid = result.value[counter].adx_portallanguageid ? result.value[counter].adx_portallanguageid : Constants.DEFAULT_LANGUAGE_CODE;
                     const adx_languagecode = result.value[counter].adx_languagecode;
-                    languageIdCodeMap.set(adx_portallanguageid, adx_languagecode);
+                    portalLanguageIdCodeMap.set(adx_portallanguageid, adx_languagecode);
                 }
             }
         }
     }
 
-    return languageIdCodeMap;
+    return portalLanguageIdCodeMap;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getWebsiteIdToLanguageMap(result: any, schema: string) {
+export function getWebsiteIdToLcidMap(result: any, schema: string) {
     const websiteIdToLanguage = new Map<string, string>();
     if (result) {
         if (result.value?.length > 0) {
@@ -125,7 +125,7 @@ export function getWebsiteIdToLanguageMap(result: any, schema: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getwebsiteLanguageIdToPortalLanguageMap(result: any, schema: string) {
+export function getWebsiteLanguageIdToPortalLanguageIdMap(result: any, schema: string) {
     const websiteLanguageIdToPortalLanguageMap = new Map<string, string>();
     if (result) {
         if (result.value?.length > 0) {

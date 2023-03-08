@@ -22,7 +22,7 @@ describe("WebExtensionContext", () => {
     afterEach(() => {
         sinon.restore();
     });
-    it("setWebExtensionContext_whenSetValue_shuldReturnSameValuesFromGetter", () => {
+    it("setWebExtensionContext_whenSetValue_shouldReturnSameValuesFromGetter", () => {
         //Act
         const entityName = "webPages";
         const entityId = "3355d5ec-b38d-46ca-a150-c00386b0a4be";
@@ -202,7 +202,7 @@ describe("WebExtensionContext", () => {
         expect(fileMap).deep.eq(expectedResult);
     });
 
-    it("updateFileDetailsInContext_whenPassAllParamsExcpetMimeType_shouldSetFileDataMap", async () => {
+    it("updateFileDetailsInContext_whenPassAllParamsExceptMimeType_shouldSetFileDataMap", async () => {
         //Act
 
         const attributePaths = {
@@ -331,9 +331,8 @@ describe("WebExtensionContext", () => {
         expect(WebExtensionContext.languageIdCodeMap).empty;
     });
 
-    it("authenticateAndUpdateDataverseProperties_withAccessToken_shouldMapWebsiteIdToLanguageAndLanguageIdCodeMap", async () => {
+    it("authenticateAndUpdateDataverseProperties_withAccessToken_languageMapsShouldStillBeUpdated", async () => {
         //Act
-        const languageIdCodeMap = new Map<string, string>([["En", "English"]]);
         const requestUrl = "make.powerPortal.com";
         const accessToken =
             "4cdf3b4d873a65135553afdf420a47dbc898ba0c1c0ece2407bbbf2bde02a68b";
@@ -367,20 +366,33 @@ describe("WebExtensionContext", () => {
             "sendAPISuccessTelemetry"
         );
 
-        const getLanguageIdCodeMap = stub(
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        const getLcidCodeMap = stub(
             schemaHelperUtil,
-            "getLanguageIdCodeMap"
+            "getLcidCodeMap"
         ).returns(languageIdCodeMap);
 
-        const getwebsiteLanguageIdToPortalLanguageMap = stub(
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        const getWebsiteIdToLcidMap = stub(
             schemaHelperUtil,
-            "getwebsiteLanguageIdToPortalLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
 
-        const getWebsiteIdToLanguageMap = stub(
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        const getWebsiteLanguageIdToPortalLanguageIdMap = stub(
             schemaHelperUtil,
-            "getWebsiteIdToLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        const getPortalLanguageIdToLcidMap = stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
@@ -403,33 +415,39 @@ describe("WebExtensionContext", () => {
         await WebExtensionContext.authenticateAndUpdateDataverseProperties();
 
         //Assert
-        expect(WebExtensionContext.websiteIdToLanguage).deep.eq(
-            languageIdCodeMap
-        );
-
-        // expect(
-        //     WebExtensionContext.websiteLanguageIdToPortalLanguageMap
-        // ).deep.eq(languageIdCodeMap);
-
         expect(WebExtensionContext.languageIdCodeMap).deep.eq(
             languageIdCodeMap
         );
-
+        expect(
+            WebExtensionContext.websiteIdToLanguage
+        ).deep.eq(websiteIdToLanguage);
+        expect(WebExtensionContext.websiteLanguageIdToPortalLanguageMap).deep.eq(
+            websiteLanguageIdToPortalLanguageMap
+        );
+        expect(WebExtensionContext.portalLanguageIdCodeMap).deep.eq(
+            portalLanguageIdCodeMap
+        );
         expect(WebExtensionContext.dataverseAccessToken).eq(accessToken);
+
         assert.calledOnceWithExactly(dataverseAuthentication, ORG_URL);
         assert.callCount(sendAPISuccessTelemetry, 3);
         assert.calledOnceWithExactly(
-            getLanguageIdCodeMap,
+            getLcidCodeMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
         assert.calledOnceWithExactly(
-            getWebsiteIdToLanguageMap,
+            getWebsiteIdToLcidMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
         assert.calledOnceWithExactly(
-            getwebsiteLanguageIdToPortalLanguageMap,
+            getPortalLanguageIdToLcidMap,
+            { value: "value" },
+            SCHEMA_VERSION.toLowerCase()
+        );
+        assert.calledOnceWithExactly(
+            getWebsiteLanguageIdToPortalLanguageIdMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
@@ -497,9 +515,8 @@ describe("WebExtensionContext", () => {
         //#endregion
     });
 
-    it("authenticateAndUpdateDataverseProperties_whenFetchCallFails_shouldNotMapToWebsiteIdToLanguageAndLanguageIdCodeMap", async () => {
+    it("authenticateAndUpdateDataverseProperties_whenFetchCallFails_languageMapsShouldStillBeUpdated", async () => {
         //Act
-        const languageIdCodeMap = new Map<string, string>([["En", "English"]]);
         const requestUrl = "make.powerPortal.com";
         const accessToken =
             "4cdf3b4d873a65135553afdf420a47dbc898ba0c1c0ece2407bbbf2bde02a68b";
@@ -538,20 +555,33 @@ describe("WebExtensionContext", () => {
             "sendAPISuccessTelemetry"
         );
 
-        const getLanguageIdCodeMap = stub(
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        const getLcidCodeMap = stub(
             schemaHelperUtil,
-            "getLanguageIdCodeMap"
+            "getLcidCodeMap"
         ).returns(languageIdCodeMap);
 
-        const getwebsiteLanguageIdToPortalLanguageMap = stub(
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        const getWebsiteIdToLcidMap = stub(
             schemaHelperUtil,
-            "getwebsiteLanguageIdToPortalLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
 
-        const getWebsiteIdToLanguageMap = stub(
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        const getWebsiteLanguageIdToPortalLanguageIdMap = stub(
             schemaHelperUtil,
-            "getWebsiteIdToLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        const getPortalLanguageIdToLcidMap = stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
 
         const _mockFetch = stub(fetch, "default").resolves({
             ok: false,
@@ -574,33 +604,39 @@ describe("WebExtensionContext", () => {
         await WebExtensionContext.authenticateAndUpdateDataverseProperties();
 
         //Assert
-        expect(WebExtensionContext.websiteIdToLanguage).deep.eq(
-            languageIdCodeMap
-        );
-
-        // expect(
-        //     WebExtensionContext.websiteLanguageIdToPortalLanguageMap
-        // ).deep.eq(languageIdCodeMap);
-
         expect(WebExtensionContext.languageIdCodeMap).deep.eq(
             languageIdCodeMap
         );
-
+        expect(
+            WebExtensionContext.websiteIdToLanguage
+        ).deep.eq(websiteIdToLanguage);
+        expect(WebExtensionContext.websiteLanguageIdToPortalLanguageMap).deep.eq(
+            websiteLanguageIdToPortalLanguageMap
+        );
+        expect(WebExtensionContext.portalLanguageIdCodeMap).deep.eq(
+            portalLanguageIdCodeMap
+        );
         expect(WebExtensionContext.dataverseAccessToken).eq(accessToken);
+
         assert.calledOnceWithExactly(dataverseAuthentication, ORG_URL);
         assert.calledThrice(sendAPISuccessTelemetry);
         assert.calledOnceWithExactly(
-            getLanguageIdCodeMap,
+            getLcidCodeMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
         assert.calledOnceWithExactly(
-            getWebsiteIdToLanguageMap,
+            getWebsiteIdToLcidMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
         assert.calledOnceWithExactly(
-            getwebsiteLanguageIdToPortalLanguageMap,
+            getPortalLanguageIdToLcidMap,
+            { value: "value" },
+            SCHEMA_VERSION.toLowerCase()
+        );
+        assert.calledOnceWithExactly(
+            getWebsiteLanguageIdToPortalLanguageIdMap,
             { value: "value" },
             SCHEMA_VERSION.toLowerCase()
         );
@@ -670,9 +706,8 @@ describe("WebExtensionContext", () => {
         //#endregion
     });
 
-    it("authenticateAndUpdateDataverseProperties_whenFetchCallThrowException_shouldNotMapToWebsiteIdToLanguageAndLanguageIdCodeMap", async () => {
+    it("authenticateAndUpdateDataverseProperties_whenFetchCallThrowException_sendFailureTelemetry", async () => {
         //Act
-        const languageIdCodeMap = new Map<string, string>([["En", "English"]]);
         const requestUrl = "make.powerPortal.com";
         const accessToken =
             "4cdf3b4d873a65135553afdf420a47dbc898ba0c1c0ece2407bbbf2bde02a68b";
@@ -702,20 +737,34 @@ describe("WebExtensionContext", () => {
         );
 
         const _mockFetch = stub(fetch, "default").throws();
-        const getLanguageIdCodeMap = stub(
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
             schemaHelperUtil,
-            "getLanguageIdCodeMap"
+            "getLcidCodeMap"
         ).returns(languageIdCodeMap);
 
-        const getwebsiteLanguageIdToPortalLanguageMap = stub(
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
             schemaHelperUtil,
-            "getwebsiteLanguageIdToPortalLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
 
-        const getWebsiteIdToLanguageMap = stub(
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
             schemaHelperUtil,
-            "getWebsiteIdToLanguageMap"
-        ).returns(languageIdCodeMap);
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
         WebExtensionContext.setWebExtensionContext(
             entityName,
             entityId,
@@ -726,15 +775,10 @@ describe("WebExtensionContext", () => {
         await WebExtensionContext.authenticateAndUpdateDataverseProperties();
 
         //Assert
-
-        expect(WebExtensionContext.websiteIdToLanguage).empty;
-
-        // expect(
-        //     WebExtensionContext.websiteLanguageIdToPortalLanguageMap
-        // ).deep.eq(languageIdCodeMap);
-
-        expect(WebExtensionContext.languageIdCodeMap).empty;
-
+        expect(WebExtensionContext.websiteIdToLanguage).length(1);
+        expect(WebExtensionContext.languageIdCodeMap).length(1);
+        expect(WebExtensionContext.portalLanguageIdCodeMap).length(1);
+        expect(WebExtensionContext.websiteLanguageIdToPortalLanguageMap).length(1);
         expect(WebExtensionContext.dataverseAccessToken).eq(accessToken);
 
         assert.calledOnceWithExactly(dataverseAuthentication, ORG_URL);
@@ -776,9 +820,5 @@ describe("WebExtensionContext", () => {
             Constants.initializationEntityName.PORTALLANGUAGE
         );
         //#endregion
-
-        assert.neverCalledWith(getLanguageIdCodeMap);
-        assert.neverCalledWith(getWebsiteIdToLanguageMap);
-        assert.neverCalledWith(getwebsiteLanguageIdToPortalLanguageMap);
     });
 });

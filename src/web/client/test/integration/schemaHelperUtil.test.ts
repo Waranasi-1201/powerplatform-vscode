@@ -18,9 +18,9 @@ import {
     isBase64Encoded,
     encodeAsBase64,
     isWebFileV2,
-    getLanguageIdCodeMap,
-    getWebsiteIdToLanguageMap,
-    getwebsiteLanguageIdToPortalLanguageMap,
+    getLcidCodeMap,
+    getWebsiteIdToLcidMap,
+    getWebsiteLanguageIdToPortalLanguageIdMap,
     useOctetStreamContentType,
 } from "../../utilities/schemaHelperUtil";
 import {
@@ -320,7 +320,7 @@ describe("schemaHelperUtil", () => {
         ]);
         const schema = "portalschemav2";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).deep.equals(expectedResult);
     });
@@ -342,7 +342,7 @@ describe("schemaHelperUtil", () => {
         ]);
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).deep.equals(expectedResult);
     });
@@ -352,7 +352,7 @@ describe("schemaHelperUtil", () => {
         const result = null;
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -362,7 +362,7 @@ describe("schemaHelperUtil", () => {
         const result = undefined;
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -372,7 +372,7 @@ describe("schemaHelperUtil", () => {
         const result = {};
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -384,7 +384,7 @@ describe("schemaHelperUtil", () => {
         };
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -396,7 +396,7 @@ describe("schemaHelperUtil", () => {
         };
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -408,7 +408,7 @@ describe("schemaHelperUtil", () => {
         };
         const schema = "portalschemav1";
         //Action
-        const resultData = getLanguageIdCodeMap(result, schema);
+        const resultData = getLcidCodeMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -436,7 +436,7 @@ describe("schemaHelperUtil", () => {
         ]);
         const schema = "portalschemav2";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).deep.equals(expectedResult);
     });
@@ -464,7 +464,7 @@ describe("schemaHelperUtil", () => {
         ]);
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).deep.equals(expectedResult);
     });
@@ -475,7 +475,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -486,7 +486,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -497,7 +497,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -508,7 +508,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -519,7 +519,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -530,7 +530,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getWebsiteIdToLanguageMap(result, schema);
+        const resultData = getWebsiteIdToLcidMap(result, schema);
         //Assert
         expect(resultData).empty;
     });
@@ -558,7 +558,7 @@ describe("schemaHelperUtil", () => {
         ]);
         const schema = "portalschemav2";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -571,25 +571,25 @@ describe("schemaHelperUtil", () => {
         const result = {
             value: [
                 {
-                    adx_portallanguageid_value: "1",
+                    _adx_portallanguageid_value: "1",
                     adx_websitelanguageid: "english",
                 },
                 {
-                    adx_portallanguageid_value: "2",
+                    _adx_portallanguageid_value: "2",
                     adx_websitelanguageid: "hindi",
                 },
                 { adx_websitelanguageid: "french" },
             ],
         };
 
-        const expectedResult = new Map<string | null, string>([
+        const expectedResult = new Map<string, string>([
             ["english", "1"],
             ["hindi", "2"],
             ["french", Constants.PORTAL_LANGUAGE_DEFAULT],
         ]);
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -603,7 +603,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -617,7 +617,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -631,7 +631,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -645,7 +645,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -659,7 +659,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );
@@ -673,7 +673,7 @@ describe("schemaHelperUtil", () => {
 
         const schema = "portalschemav1";
         //Action
-        const resultData = getwebsiteLanguageIdToPortalLanguageMap(
+        const resultData = getWebsiteLanguageIdToPortalLanguageIdMap(
             result,
             schema
         );

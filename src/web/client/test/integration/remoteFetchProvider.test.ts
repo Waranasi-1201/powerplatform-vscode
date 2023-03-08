@@ -19,6 +19,8 @@ import * as urlBuilderUtil from "../../utilities/urlBuilderUtil";
 import * as commonUtil from "../../utilities/commonUtil";
 import { expect } from "chai";
 import * as errorHandler from "../../common/errorHandler";
+import * as authenticationProvider from "../../common/authenticationProvider";
+
 
 describe("remoteFetchProvider", () => {
     afterEach(() => {
@@ -38,10 +40,44 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            "webPages",
+            "aa563be7-9a38-4a89-9216-47f9fc6a3f14",
             queryParamsMap
         );
+
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
 
         const portalFs = new PortalsFS();
         const _mockFetch = stub(fetch, "default").resolves({

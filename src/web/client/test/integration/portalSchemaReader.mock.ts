@@ -70,10 +70,11 @@ export const portal_schema_V1 = {
                 _foldername: "web-pages",
                 _propextension: "webpage",
                 _exporttype: "SubFolders",
-                _languagefield: "adx_webpagelanguageid",
+                _languagefield: "_adx_webpagelanguageid_value",
                 _languagegroupby: "adx_rootwebpageid",
                 _fetchQueryParameters:
                     "?$filter=adx_webpageid%20eq%20{entityId}&$select=adx_name,adx_copy,adx_customcss,adx_customjavascript,adx_partialurl",
+                _multiFileFetchQueryParameters: "?$filter=_adx_websiteid_value%20eq%20{websiteId}&$select=adx_webpageid,_adx_webpagelanguageid_value,adx_name,adx_copy,adx_customcss,adx_customjavascript,adx_partialurl",
                 _attributes: "adx_customcss,adx_customjavascript,adx_copy",
                 _attributesExtension: new Map([
                     ["adx_customcss", "customcss.css"],

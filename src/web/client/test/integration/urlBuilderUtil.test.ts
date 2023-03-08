@@ -20,7 +20,7 @@ import {
     schemaEntityName,
     entityAttributesWithBase64Encoding,
 } from "../../schema/constants";
-import { httpMethod } from "../../common/constants";
+import { httpMethod, queryParameters } from "../../common/constants";
 import * as schemaHelper from "../../utilities/schemaHelperUtil";
 import * as portalSchemaReader from "../../schema/portalSchemaReader";
 import WebExtensionContext, {
@@ -185,6 +185,9 @@ describe("URLBuilder", () => {
                 ["api", "api"],
                 ["data", "data"],
                 ["version", "1.0"],
+            ]),
+            urlParametersMap: new Map<string, string>([
+                [queryParameters.WEBSITE_ID, "WEBSITE_ID"],
             ]),
         } as IWebExtensionContext;
 

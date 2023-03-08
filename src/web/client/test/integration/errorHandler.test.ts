@@ -214,9 +214,10 @@ describe("errorHandler", () => {
             queryParamsMap
         );
         //Assert
-        const detailMessage = vscode.l10n.t("Unable to find that app");
+        const detailMessage = { detail: vscode.l10n.t("Unable to find that app"), modal: true };
+        const errorString = vscode.l10n.t("There was a problem opening the workspace");
         expect(result).false;
-        assert.calledWith(_mockShowErrorMessage, detailMessage);
+        assert.calledWith(_mockShowErrorMessage, errorString, detailMessage);
         assert.calledOnce(_mockShowErrorMessage);
     });
 
@@ -397,9 +398,10 @@ describe("errorHandler", () => {
         //Action
         const result = checkMandatoryPathParameters(appName, entity, entityId);
         //Assert
-        const detailMessage = vscode.l10n.t("Unable to find that app");
+        const detailMessage = { detail: vscode.l10n.t("Unable to find that app"), modal: true };
+        const errorString = vscode.l10n.t("There was a problem opening the workspace");
         expect(result).false;
-        assert.calledWith(_mockShowErrorMessage, detailMessage);
+        assert.calledWith(_mockShowErrorMessage, errorString, detailMessage);
         assert.calledOnce(_mockShowErrorMessage);
     });
 
@@ -580,11 +582,14 @@ describe("errorHandler", () => {
         //Action
         const result = checkMandatoryQueryParameters(appName, queryParamsMap);
         //Assert
+        const detailMessage = { detail: vscode.l10n.t("Unable to find that app"), modal: true };
+        const errorString = vscode.l10n.t("There was a problem opening the workspace");
         expect(result).false;
         assert.calledOnce(_mockShowErrorMessage);
         assert.calledWith(
             _mockShowErrorMessage,
-            vscode.l10n.t("Unable to find that app")
+            errorString,
+            detailMessage
         );
     });
 });

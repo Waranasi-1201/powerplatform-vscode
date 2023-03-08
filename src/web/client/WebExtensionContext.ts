@@ -9,7 +9,7 @@ import { dataverseAuthentication, getHeader } from "./common/authenticationProvi
 import * as Constants from "./common/constants";
 import { getDataSourcePropertiesMap, getEntitiesFolderNameMap, getEntitiesSchemaMap } from "./schema/portalSchemaReader";
 import { WebExtensionTelemetry } from "./telemetry/webExtensionTelemetry";
-import { getLanguageIdCodeMap, getPortalLanguageIdCodeMap, getWebsiteIdToLanguageMap, getwebsiteLanguageIdToPortalLanguageMap, IAttributePath } from "./utilities/schemaHelperUtil";
+import { getLcidCodeMap, getPortalLanguageIdToLcidMap, getWebsiteIdToLcidMap, getWebsiteLanguageIdToPortalLanguageIdMap, IAttributePath } from "./utilities/schemaHelperUtil";
 import { getCustomRequestURL } from "./utilities/urlBuilderUtil";
 import { schemaKey } from "./schema/constants";
 import { telemetryEventNames } from "./telemetry/constants";
@@ -212,8 +212,8 @@ class WebExtensionContext implements IWebExtensionContext {
             }
             this.telemetry.sendAPISuccessTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
-            this._languageIdCodeMap = getLanguageIdCodeMap(result, schema);
-            this._portalLanguageIdCodeMap = getPortalLanguageIdCodeMap(result, schema);
+            this._languageIdCodeMap = getLcidCodeMap(result, schema);
+            this._portalLanguageIdCodeMap = getPortalLanguageIdToLcidMap(result, schema);
         } catch (error) {
             const errorMsg = (error as Error)?.message;
             this.telemetry.sendAPIFailureTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
@@ -238,7 +238,7 @@ class WebExtensionContext implements IWebExtensionContext {
             }
             this.telemetry.sendAPISuccessTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
-            this._websiteLanguageIdToPortalLanguageMap = getwebsiteLanguageIdToPortalLanguageMap(result, schema);
+            this._websiteLanguageIdToPortalLanguageMap = getWebsiteLanguageIdToPortalLanguageIdMap(result, schema);
         } catch (error) {
             const errorMsg = (error as Error)?.message;
             this.telemetry.sendAPIFailureTelemetry(requestUrl, languageEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime, errorMsg);
@@ -265,7 +265,7 @@ class WebExtensionContext implements IWebExtensionContext {
             this.telemetry.sendAPISuccessTelemetry(requestUrl, websiteEntityName, Constants.httpMethod.GET, new Date().getTime() - requestSentAtTime);
             const result = await response?.json();
 
-            this._websiteIdToLanguage = getWebsiteIdToLanguageMap(result, schema);
+            this._websiteIdToLanguage = getWebsiteIdToLcidMap(result, schema);
 
         } catch (error) {
             const errorMsg = (error as Error)?.message;
