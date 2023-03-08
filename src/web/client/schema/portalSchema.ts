@@ -84,13 +84,13 @@ export const portal_schema_V1 = {
                 "_dataverseenityname": "annotations",
                 "_displayname": "Web File",
                 "_etc": "10020",
-                "_primaryidfield": "adx_webfileid",
+                "_primaryidfield": "_objectid_value",
                 "_primarynamefield": "filename",
                 "_disableplugins": "true",
                 "_foldername": "web-files",
                 "_propextension": "webfile",
                 "_exporttype": "SingleFolder",
-                "_fetchQueryParameters": "?$filter=_objectid_value%20eq%20{entityId}%20&$select=mimetype,documentbody,filename,annotationid",
+                "_fetchQueryParameters": "?$filter=_objectid_value%20eq%20{entityId}%20&$select=mimetype,documentbody,filename,annotationid,_objectid_value",
                 "_attributes": "documentbody",
                 "_attributesExtension": new Map([
                     ["documentbody", "css"]

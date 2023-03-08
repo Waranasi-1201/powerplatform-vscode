@@ -111,7 +111,7 @@ async function createContentFiles(
         }
 
         // Create folder paths
-        let filePathInPortalFS = '';
+        let filePathInPortalFS = `${Constants.PORTALS_URI_SCHEME}:/${portalFolderName}/${subUri}/`;
         if (exportType && (exportType === folderExportType.SubFolders)) {
             filePathInPortalFS = `${Constants.PORTALS_URI_SCHEME}:/${portalFolderName}/${subUri}/${fileName}/`;
             await portalsFS.createDirectory(vscode.Uri.parse(filePathInPortalFS, true));
@@ -179,7 +179,7 @@ async function createContentFiles(
                 result[Constants.MIMETYPE]);
         }
 
-        if (Constants.ENABLE_MULTI_FILE_FEATURE && entityId === WebExtensionContext.defaultEntityId) {
+        if (entityId === WebExtensionContext.defaultEntityId) {
             await WebExtensionContext.updateSingleFileUrisInContext(vscode.Uri.parse(fileUri));
 
             // Not awaited intentionally
