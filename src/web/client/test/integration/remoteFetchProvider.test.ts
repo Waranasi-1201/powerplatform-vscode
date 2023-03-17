@@ -29,6 +29,7 @@ describe("remoteFetchProvider", () => {
     it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccess_shouldCallAllSuccessFunction", async () => {
         //Act
         const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -40,8 +41,8 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPages",
-            "aa563be7-9a38-4a89-9216-47f9fc6a3f14",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
@@ -80,19 +81,18 @@ describe("remoteFetchProvider", () => {
         ).resolves(accessToken);
 
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
             json: () => {
                 return new Promise((resolve) => {
                     return resolve({
-                        value: [
-                            {
-                                value: '{"ddrive":"testFile","value":"value"}',
-                            },
-                            { name: "test Name" },
-                            { _languagefield: "languagefield" },
-                        ],
+                        value: [{
+                            name: "testname",
+                            _powerpagesitelanguageid_value: "d8b40829-17c8-4082-9e3f-89d60dc0ab7e",
+                            powerpagecomponentid: entityId
+                        }],
                     });
                 });
             },
@@ -131,7 +131,7 @@ describe("remoteFetchProvider", () => {
             WebExtensionContext,
             "updateSingleFileUrisInContext"
         );
-        const fileUri: vscode.Uri = { path: "testuri" } as vscode.Uri;
+        const fileUri: vscode.Uri = { path: "powerplatform-vfs:/testWebSite/web-pages/testname/" } as vscode.Uri;
         const parse = stub(vscode.Uri, "parse").returns(fileUri);
         const executeCommand = stub(vscode.commands, "executeCommand");
         const createDirectory = stub(portalFs, "createDirectory");
@@ -172,7 +172,7 @@ describe("remoteFetchProvider", () => {
         );
         expect(
             updateFileDetailsInContextCalls[0].args[1],
-            "aa563be7-9a38-4a89-9216-47f9fc6a3f14"
+            entityId
         );
         expect(updateFileDetailsInContextCalls[0].args[2], "webpages");
         expect(updateFileDetailsInContextCalls[0].args[3], "test.txt");
@@ -190,7 +190,7 @@ describe("remoteFetchProvider", () => {
         );
         expect(
             updateFileDetailsInContextCalls[1].args[1],
-            "aa563be7-9a38-4a89-9216-47f9fc6a3f14"
+            entityId
         );
         expect(updateFileDetailsInContextCalls[1].args[2], "webpages");
         expect(updateFileDetailsInContextCalls[1].args[3], "test.txt");
@@ -208,7 +208,7 @@ describe("remoteFetchProvider", () => {
         );
         expect(
             updateFileDetailsInContextCalls[2].args[1],
-            "aa563be7-9a38-4a89-9216-47f9fc6a3f14"
+            entityId
         );
         expect(updateFileDetailsInContextCalls[2].args[2], "webpages");
         expect(updateFileDetailsInContextCalls[2].args[3], "test.txt");
@@ -227,8 +227,10 @@ describe("remoteFetchProvider", () => {
         assert.calledOnce(sendAPISuccessTelemetry);
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessButDataIsNull_shouldCallShowErrorMessage", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccessButDataIsNull_shouldCallShowErrorMessage", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -240,12 +242,47 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
@@ -286,8 +323,10 @@ describe("remoteFetchProvider", () => {
         assert.calledOnce(_mockFetch);
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeNotSuccess_shouldCallShowErrorMessage", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseNotSuccess_shouldCallShowErrorMessage", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -300,12 +339,47 @@ describe("remoteFetchProvider", () => {
 
         const showErrorMessage = stub(vscode.window, "showErrorMessage");
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: false,
             statusText: "statusText",
@@ -350,8 +424,10 @@ describe("remoteFetchProvider", () => {
         );
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndSubUriIsBlank_shouldThrowError", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccessAndSubUriIsBlank_shouldThrowError", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -363,24 +439,58 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
             json: () => {
                 return new Promise((resolve) => {
                     return resolve({
-                        value: [
-                            {
-                                value: '{"ddrive":"testFile","value":"value"}',
-                            },
-                            { name: "test Name" },
-                            { _languagefield: "languagefield" },
+                        value: [{
+                            name: "testname",
+                            _powerpagesitelanguageid_value: "d8b40829-17c8-4082-9e3f-89d60dc0ab7e",
+                            powerpagecomponentid: entityId
+                        }
                         ],
                     });
                 });
@@ -417,8 +527,10 @@ describe("remoteFetchProvider", () => {
         assert.callCount(getEntity, 5);
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndAttributesIsBlank_shouldThrowError", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccessAndAttributesIsBlank_shouldThrowError", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -430,24 +542,58 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
             json: () => {
                 return new Promise((resolve) => {
                     return resolve({
-                        value: [
-                            {
-                                value: '{"ddrive":"testFile","value":"value"}',
-                            },
-                            { name: "test Name" },
-                            { _languagefield: "languagefield" },
+                        value: [{
+                            name: "testname",
+                            _powerpagesitelanguageid_value: "d8b40829-17c8-4082-9e3f-89d60dc0ab7e",
+                            powerpagecomponentid: entityId
+                        }
                         ],
                     });
                 });
@@ -486,8 +632,10 @@ describe("remoteFetchProvider", () => {
         assert.callCount(getEntity, 5);
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndAttributeExtensionIsBlank_shouldThrowError", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccessAndAttributeExtensionIsBlank_shouldThrowError", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -499,24 +647,58 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
             json: () => {
                 return new Promise((resolve) => {
                     return resolve({
-                        value: [
-                            {
-                                value: '{"ddrive":"testFile","value":"value"}',
-                            },
-                            { name: "test Name" },
-                            { _languagefield: "languagefield" },
+                        value: [{
+                            name: "testname",
+                            _powerpagesitelanguageid_value: "d8b40829-17c8-4082-9e3f-89d60dc0ab7e",
+                            powerpagecomponentid: entityId
+                        }
                         ],
                     });
                 });
@@ -556,8 +738,10 @@ describe("remoteFetchProvider", () => {
         assert.callCount(getEntity, 5);
     });
 
-    it("fetchDataFromDataverseAndUpdateVFS_whenResposeSuccessAndFileNameIsDefaultfilename_shouldThrowError", async () => {
+    it("fetchDataFromDataverseAndUpdateVFS_whenResponseSuccessAndFileNameIsDefaultFilename_shouldThrowError", async () => {
         //Act
+        const entityName = "webpages";
+        const entityId = "aa563be7-9a38-4a89-9216-47f9fc6a3f14";
         const queryParamsMap = new Map<string, string>([
             [Constants.queryParameters.ORG_URL, "powerPages.com"],
             [
@@ -569,24 +753,58 @@ describe("remoteFetchProvider", () => {
         ]);
 
         WebExtensionContext.setWebExtensionContext(
-            "webPage",
-            "",
+            entityName,
+            entityId,
             queryParamsMap
         );
 
+        const languageIdCodeMap = new Map<string, string>([["1033", "en-US"]]);
+        stub(
+            schemaHelperUtil,
+            "getLcidCodeMap"
+        ).returns(languageIdCodeMap);
+
+        const websiteIdToLanguage = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "1033"],
+        ]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteIdToLcidMap"
+        ).returns(websiteIdToLanguage);
+
+        const websiteLanguageIdToPortalLanguageMap = new Map<string, string>([
+            ["a58f4e1e-5fe2-45ee-a7c1-398073b40181", "d8b40829-17c8-4082-9e3f-89d60dc0ab7e"],]);
+        stub(
+            schemaHelperUtil,
+            "getWebsiteLanguageIdToPortalLanguageIdMap"
+        ).returns(websiteLanguageIdToPortalLanguageMap);
+
+        const portalLanguageIdCodeMap = new Map<string, string>([
+            ["d8b40829-17c8-4082-9e3f-89d60dc0ab7e", "1033"],]);
+        stub(
+            schemaHelperUtil,
+            "getPortalLanguageIdToLcidMap"
+        ).returns(portalLanguageIdCodeMap);
+
+        const accessToken = "ae3308da-d75b-4666-bcb8-8f33a3dd8a8d";
+        stub(
+            authenticationProvider,
+            "dataverseAuthentication"
+        ).resolves(accessToken);
+
         const portalFs = new PortalsFS();
+        await WebExtensionContext.authenticateAndUpdateDataverseProperties();
         const _mockFetch = stub(fetch, "default").resolves({
             ok: true,
             statusText: "statusText",
             json: () => {
                 return new Promise((resolve) => {
                     return resolve({
-                        value: [
-                            {
-                                value: '{"ddrive":"testFile","value":"value"}',
-                            },
-                            { name: "test Name" },
-                            { _languagefield: "languagefield" },
+                        value: [{
+                            name: "testname",
+                            _powerpagesitelanguageid_value: "d8b40829-17c8-4082-9e3f-89d60dc0ab7e",
+                            powerpagecomponentid: entityId
+                        }
                         ],
                     });
                 });

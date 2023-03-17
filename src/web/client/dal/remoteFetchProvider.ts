@@ -43,8 +43,6 @@ export async function fetchDataFromDataverseAndUpdateVFS(portalFs: PortalsFS) {
 
         const result = await response.json();
         const data = result.value;
-        console.log(data.length);
-
 
         if (!data) {
             vscode.window.showErrorMessage("microsoft-powerapps-portals.webExtension.fetch.nocontent.error", "Response data is empty");

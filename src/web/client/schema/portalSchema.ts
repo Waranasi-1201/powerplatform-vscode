@@ -199,8 +199,10 @@ export const portal_schema_V2 = {
                 "_primarynamefield": "name",
                 "_disableplugins": "false",
                 "_exporttype": "SubFolders",
+                "_languagefield": "_powerpagesitelanguageid_value",
                 "_foldername": "web-pages",
                 "_fetchQueryParameters": "?$filter=powerpagecomponentid%20eq%20{entityId}&$select=name,content",
+                "_multiFileFetchQueryParameters": "?$filter=_powerpagesiteid_value%20eq%20{websiteId}%20and%20powerpagecomponenttype%20eq%202%20and%20_powerpagesitelanguageid_value%20ne%20null&$select=name,content,_powerpagesitelanguageid_value",
                 "_attributes": "content.customcss,content.customjavascript,content.copy",
                 "_attributesExtension": new Map([
                     ["content.customcss", "customcss.css"],

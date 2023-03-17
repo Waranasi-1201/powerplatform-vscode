@@ -21,7 +21,7 @@ export const IS_FIRST_RUN_EXPERIENCE = 'isFirstRunExperience';
 export const ODATA_ETAG = "@odata.etag";
 
 // Multi-file feature constants
-export const ENABLE_MULTI_FILE_FEATURE = false;
+export const ENABLE_MULTI_FILE_FEATURE = true;
 
 export enum initializationEntityName {
     WEBSITE = "websites",

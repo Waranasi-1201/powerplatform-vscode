@@ -151,6 +151,7 @@ class WebExtensionContext implements IWebExtensionContext {
         const accessToken: string = await dataverseAuthentication(dataverseOrgUrl);
 
         if (!accessToken) {
+            this._dataverseAccessToken = "";
             this.telemetry.sendErrorTelemetry(telemetryEventNames.WEB_EXTENSION_DATAVERSE_AUTHENTICATION_MISSING);
             throw vscode.FileSystemError.NoPermissions();
         }

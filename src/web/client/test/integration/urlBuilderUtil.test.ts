@@ -20,7 +20,7 @@ import {
     schemaEntityName,
     entityAttributesWithBase64Encoding,
 } from "../../schema/constants";
-import { httpMethod, queryParameters } from "../../common/constants";
+import { ENABLE_MULTI_FILE_FEATURE, httpMethod, queryParameters } from "../../common/constants";
 import * as schemaHelper from "../../utilities/schemaHelperUtil";
 import * as portalSchemaReader from "../../schema/portalSchemaReader";
 import WebExtensionContext, {
@@ -198,6 +198,10 @@ describe("URLBuilder", () => {
                     "FETCH_QUERY_PARAMETERS",
                 ],
                 [
+                    schemaEntityKey.MULTI_FILE_FETCH_QUERY_PARAMETERS,
+                    "MULTI_FILE_FETCH_QUERY_PARAMETERS",
+                ],
+                [
                     schemaEntityKey.DATAVERSE_ENTITY_NAME,
                     "DATAVERSE_ENTITY_NAME",
                 ],
@@ -221,7 +225,7 @@ describe("URLBuilder", () => {
             isSingleEntity
         );
 
-        const expResult = "singleEntityURLFETCH_QUERY_PARAMETERS";
+        const expResult = ENABLE_MULTI_FILE_FEATURE ? "singleEntityURLMULTI_FILE_FETCH_QUERY_PARAMETERS" : "singleEntityURLFETCH_QUERY_PARAMETERS";
         expect(result).eq(expResult);
     });
 
